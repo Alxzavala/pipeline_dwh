@@ -30,3 +30,4 @@ venv/
 Thumbs.db
 .vscode/
 docs/superpowers/
+tfplan

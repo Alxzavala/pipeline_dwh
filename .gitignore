@@ -1,0 +1,32 @@
+# Credentials & secrets
+*credentials*.json
+*service-account*.json
+*-key.json
+.env
+.env.*
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Data (raw sample data stays local, not versioned)
+/data/*.csv
+!/data/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+docs/superpowers/

@@ -29,6 +29,7 @@ locals {
     "iamcredentials.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "sts.googleapis.com",
+    "datacatalog.googleapis.com",
   ]
 }
 

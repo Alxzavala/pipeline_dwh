@@ -1,0 +1,6 @@
+tipo de identificaciÃ³n,nÃºmero de identificaciÃ³n,nÃºmero de cuenta,nombres,tipo transacciÃ³n,monto transacciÃ³n,tipo de producto,ciudad,fecha-hora,fecha de nacimiento,direcciÃ³n del cliente,telÃ©fono del cliente,correo del cliente,reporte centrales de riesgo,monto reporte de central de riesgo,tiempo en mora del reporte de riesgo
+TI,869689427,5729333560,Cliente0 PÃ©rez,COMPRA,514178.0,INVERSIÃN,MEDELLÃN,2024-02-28 05:30:54,1800-01-01 00:00:00,Calle 78 #1-50,3638292757,cliente0.570@mail.com,True,189620.0,30
+CE,443107455,8313273197,Cliente1 MÃ©ndez,TRANSFERENCIA,3775097.0,CUENTA DE AHORROS,BUCARAMANGA,2024-02-28 06:59:27,1959-04-21 00:00:00,Carrera 67 #3-40,3869197084,cliente1.994@mail.com,True,170826.0,30
+CE,953479893,3109087126,Cliente2 RamÃ­rez,COMPRA,2010844.0,CUENTA CORRIENTE,BARRANQUILLA,2024-02-28 08:48:17,1995-03-25 00:00:00,Carrera 4 #73-43,3823151477,,True,642458.0,60
+CC,555761619,6097167283,Cliente3 PÃ©rez,DEPÃSITO,4149752.0,TARJETA DE CRÃDITO,BUCARAMANGA,2024-02-28 19:06:37,1951-10-01 00:00:00,Carrera 12 #15-28,3990535441,cliente3.896@outlook.com,False,0.0,0
+PAS,303469706,5436781491,Cliente4 PÃ©rez,TRANSFERENCIA,534425.0,CUENTA DE AHORROS,PEREIRA,2024-02-28 19:10:56,2002-06-02 00:00:00,Calle 109 #88-2,3426177665,,True,593757.0,90

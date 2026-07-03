@@ -95,7 +95,10 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - run: python -m pipeline.main --csv-path data/batch_1.csv --batch-id ci_batch
+      # data/*.csv is gitignored (real customer data must never be committed),
+      # so this smoke-runs the pipeline against the small tracked fixture
+      # instead of a real batch file.
+      - run: python -m pipeline.main --csv-path tests/fixtures/ci_smoke_test.csv --batch-id ci_batch
         env:
           GCP_PROJECT_ID: ${{ env.GCP_PROJECT_ID }}
           RAW_BUCKET: ${{ env.RAW_BUCKET }}

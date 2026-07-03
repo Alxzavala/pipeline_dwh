@@ -1,0 +1,101 @@
+name: CI/CD - DWH Bancario
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      run_pipeline:
+        description: "Ejecutar el pipeline ETL contra BigQuery"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GCP_PROJECT_ID: pelagic-plexus-360917
+  RAW_BUCKET: pelagic-plexus-360917-raw-zone
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: ruff check pipeline scripts tests
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.5"
+      - run: terraform -chdir=terraform fmt -check -recursive
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: pytest tests -v
+
+  terraform-plan:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform -chdir=terraform init
+      - run: |
+          terraform -chdir=terraform plan \
+            -var="project_id=${{ env.GCP_PROJECT_ID }}" \
+            -var="github_repository=${{ github.repository }}"
+
+  terraform-apply:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform -chdir=terraform init
+      - run: |
+          terraform -chdir=terraform apply -auto-approve \
+            -var="project_id=${{ env.GCP_PROJECT_ID }}" \
+            -var="github_repository=${{ github.repository }}"
+
+  run-pipeline:
+    runs-on: ubuntu-latest
+    needs: terraform-apply
+    if: github.event.inputs.run_pipeline == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python -m pipeline.main --csv-path data/batch_1.csv --batch-id ci_batch
+        env:
+          GCP_PROJECT_ID: ${{ env.GCP_PROJECT_ID }}
+          RAW_BUCKET: ${{ env.RAW_BUCKET }}

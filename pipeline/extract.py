@@ -1,3 +1,6 @@
+from decimal import Decimal
+
+import pandas as pd
 from google.cloud import bigquery, storage
 
 from pipeline.config import Config
@@ -33,12 +36,37 @@ def upload_to_raw_bucket(config: Config, local_path: str, blob_name: str) -> str
     return f"gs://{config.raw_bucket}/{blob_name}"
 
 
+def _coerce_string_columns(df: pd.DataFrame, string_fields: set) -> pd.DataFrame:
+    df = df.copy()
+    for col in string_fields & set(df.columns):
+        if pd.api.types.is_integer_dtype(df[col]):
+            df[col] = df[col].astype(str)
+        elif pd.api.types.is_float_dtype(df[col]):
+            df[col] = df[col].apply(
+                lambda v: None if pd.isna(v) else (str(int(v)) if float(v).is_integer() else str(v))
+            )
+        else:
+            df[col] = df[col].where(df[col].notna(), None)
+    return df
+
+
+def _coerce_numeric_columns(df: pd.DataFrame, numeric_fields: set) -> pd.DataFrame:
+    df = df.copy()
+    for col in numeric_fields & set(df.columns):
+        df[col] = df[col].apply(lambda v: None if pd.isna(v) else Decimal(str(v)))
+    return df
+
+
 def load_dataframe_to_staging(config: Config, df, batch_id: str) -> int:
     client = bigquery.Client(project=config.project_id)
     table_ref = f"{config.project_id}.{config.raw_dataset}.stg_transacciones"
     load_columns = [f.name for f in STAGING_SCHEMA if f.name != "_source_file"]
+    string_fields = {f.name for f in STAGING_SCHEMA if f.field_type == "STRING"}
+    numeric_fields = {f.name for f in STAGING_SCHEMA if f.field_type == "NUMERIC"}
 
     upload_df = df[[c for c in load_columns if c in df.columns]].copy()
+    upload_df = _coerce_string_columns(upload_df, string_fields)
+    upload_df = _coerce_numeric_columns(upload_df, numeric_fields)
     upload_df["_source_file"] = batch_id
 
     job_config = bigquery.LoadJobConfig(

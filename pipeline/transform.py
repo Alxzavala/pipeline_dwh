@@ -114,7 +114,7 @@ MERGE `{project}.{marts}.fact_transacciones` AS target
 USING (
   SELECT
     TO_HEX(SHA256(CONCAT(
-      s.numero_identificacion, '|', s.numero_cuenta, '|', s.tipo_transaccion, '|',
+      s.numero_identificacion, '|', COALESCE(s.numero_cuenta, ''), '|', s.tipo_transaccion, '|',
       CAST(s.fecha_hora_transaccion AS STRING), '|', CAST(s.monto_transaccion AS STRING)
     ))) AS sk_transaccion,
     dc.sk_cliente,
@@ -134,7 +134,7 @@ USING (
     ON dc.numero_identificacion = s.numero_identificacion AND dc.es_vigente = TRUE
   LEFT JOIN `{project}.{marts}.dim_cuenta` dcu
     ON dcu.numero_cuenta = s.numero_cuenta
-  WHERE s._batch_id = @batch_id
+  WHERE s._batch_id = @batch_id AND s.fecha_hora_transaccion IS NOT NULL
 ) AS source
 ON target.sk_transaccion = source.sk_transaccion
 WHEN NOT MATCHED THEN

@@ -69,6 +69,15 @@ def load_dataframe_to_staging(config: Config, df, batch_id: str) -> int:
     upload_df = _coerce_numeric_columns(upload_df, numeric_fields)
     upload_df["_source_file"] = batch_id
 
+    # Retrying a failed batch must not double-load staging: delete any rows
+    # from a prior (possibly partial) attempt at this batch_id before appending.
+    client.query(
+        f"DELETE FROM `{table_ref}` WHERE _batch_id = @batch_id",
+        job_config=bigquery.QueryJobConfig(
+            query_parameters=[bigquery.ScalarQueryParameter("batch_id", "STRING", batch_id)]
+        ),
+    ).result()
+
     job_config = bigquery.LoadJobConfig(
         write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
         schema=STAGING_SCHEMA,

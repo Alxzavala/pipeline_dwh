@@ -90,14 +90,15 @@ GROUP BY s.numero_identificacion
 DIM_CUENTA_MERGE = """
 MERGE `{project}.{marts}.dim_cuenta` AS target
 USING (
-  SELECT DISTINCT
+  SELECT
     s.numero_cuenta,
-    dc.sk_cliente,
-    FARM_FINGERPRINT(s.tipo_producto) AS sk_producto
+    ANY_VALUE(dc.sk_cliente) AS sk_cliente,
+    ANY_VALUE(FARM_FINGERPRINT(s.tipo_producto)) AS sk_producto
   FROM `{project}.{raw}.stg_transacciones` s
   JOIN `{project}.{marts}.dim_cliente` dc
     ON dc.numero_identificacion = s.numero_identificacion AND dc.es_vigente = TRUE
   WHERE s._batch_id = @batch_id AND s.numero_cuenta IS NOT NULL
+  GROUP BY s.numero_cuenta
 ) AS source
 ON target.numero_cuenta = source.numero_cuenta
 WHEN MATCHED THEN
@@ -135,6 +136,12 @@ USING (
   LEFT JOIN `{project}.{marts}.dim_cuenta` dcu
     ON dcu.numero_cuenta = s.numero_cuenta
   WHERE s._batch_id = @batch_id AND s.fecha_hora_transaccion IS NOT NULL
+  QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY TO_HEX(SHA256(CONCAT(
+      s.numero_identificacion, '|', COALESCE(s.numero_cuenta, ''), '|', s.tipo_transaccion, '|',
+      CAST(s.fecha_hora_transaccion AS STRING), '|', CAST(s.monto_transaccion AS STRING)
+    )))
+  ) = 1
 ) AS source
 ON target.sk_transaccion = source.sk_transaccion
 WHEN NOT MATCHED THEN

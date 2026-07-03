@@ -2,6 +2,7 @@
 *credentials*.json
 *service-account*.json
 *-key.json
+scripts/impersonated_adc.json
 .env
 .env.*
 

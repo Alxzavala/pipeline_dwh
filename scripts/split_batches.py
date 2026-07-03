@@ -6,9 +6,9 @@ import pandas as pd
 
 from pipeline.quality import fix_mojibake
 
-BATCH_1_SIZE = 180
+BATCH_1_SIZE = 700
 SEED = 42
-MUTATE_COUNT = 2
+MUTATE_COUNT = 3
 
 
 def split(source_csv: str, output_dir: str) -> None:

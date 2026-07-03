@@ -73,6 +73,16 @@ resource "google_project_iam_member" "pipeline_project_iam_admin" {
   member  = "serviceAccount:${google_service_account.pipeline.email}"
 }
 
+# Needed for CI's Terraform apply to manage google_data_catalog_taxonomy /
+# google_data_catalog_policy_tag (data_governance.tf) - distinct from the
+# per-tag categoryFineGrainedReader role granted there, which only lets the
+# SA read PII values at query time, not manage the taxonomy resource itself.
+resource "google_project_iam_member" "pipeline_datacatalog_admin" {
+  project = var.project_id
+  role    = "roles/datacatalog.categoryAdmin"
+  member  = "serviceAccount:${google_service_account.pipeline.email}"
+}
+
 resource "google_iam_workload_identity_pool" "github" {
   workload_identity_pool_id = "github-actions-pool"
   project                   = var.project_id

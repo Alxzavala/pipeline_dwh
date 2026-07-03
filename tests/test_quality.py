@@ -39,6 +39,16 @@ def test_fix_mojibake_leaves_clean_text_untouched():
     assert fix_mojibake("Cali") == "Cali"
 
 
+def test_clean_dataframe_accepts_truncated_mojibake_transaction_type():
+    # Real source data sometimes loses the second byte of a corrupted
+    # accented character (e.g. "DEPÃSITO" instead of a decodable 2-byte
+    # sequence), which fails the latin-1/utf-8 round trip in fix_mojibake.
+    df = pd.DataFrame([_sample_row(**{"tipo transacciÃ³n": "DEPÃSITO"})])
+    valid_df, rejected_df = clean_dataframe(df, batch_id="test-batch")
+    assert len(rejected_df) == 0
+    assert valid_df.iloc[0]["tipo_transaccion"] == "DEPÓSITO"
+
+
 def test_normalize_catalog_value_maps_variant_to_canonical():
     assert normalize_catalog_value("deposito", TIPO_TRANSACCION_CATALOG) == "DEPÓSITO"
 

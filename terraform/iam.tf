@@ -18,7 +18,10 @@ resource "google_project_iam_member" "pipeline_bq_job_user" {
 
 resource "google_storage_bucket_iam_member" "pipeline_bucket_admin" {
   bucket = google_storage_bucket.raw_zone.name
-  role   = "roles/storage.objectAdmin"
+  # storage.admin (not objectAdmin) so Terraform can read/manage bucket-level
+  # metadata (storage.buckets.get/getIamPolicy) for the google_storage_bucket
+  # resource itself, not just objects inside it.
+  role   = "roles/storage.admin"
   member = "serviceAccount:${google_service_account.pipeline.email}"
 }
 
@@ -30,7 +33,7 @@ resource "google_storage_bucket_iam_member" "pipeline_bucket_admin" {
 # of runtime-vs-infra-admin duties, but is out of scope for this exercise.
 resource "google_storage_bucket_iam_member" "pipeline_tfstate_admin" {
   bucket = "pelagic-plexus-360917-tfstate"
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.admin"
   member = "serviceAccount:${google_service_account.pipeline.email}"
 }
 

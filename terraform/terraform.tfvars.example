@@ -1,2 +1,4 @@
-project_id         = "pelagic-plexus-360917"
-github_repository  = "your-github-username/pipeline-dwh-bancario"
+project_id          = "your-gcp-project-id"
+github_repository   = "your-github-username/pipeline-dwh-bancario"
+billing_account_id  = "XXXXXX-XXXXXX-XXXXXX"
+alert_email         = "you@example.com"

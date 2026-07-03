@@ -61,7 +61,9 @@ jobs:
       - run: |
           terraform -chdir=terraform plan \
             -var="project_id=${{ env.GCP_PROJECT_ID }}" \
-            -var="github_repository=${{ github.repository }}"
+            -var="github_repository=${{ github.repository }}" \
+            -var="billing_account_id=${{ secrets.TF_VAR_BILLING_ACCOUNT_ID }}" \
+            -var="alert_email=${{ secrets.TF_VAR_ALERT_EMAIL }}"
 
   terraform-apply:
     runs-on: ubuntu-latest
@@ -79,7 +81,9 @@ jobs:
       - run: |
           terraform -chdir=terraform apply -auto-approve \
             -var="project_id=${{ env.GCP_PROJECT_ID }}" \
-            -var="github_repository=${{ github.repository }}"
+            -var="github_repository=${{ github.repository }}" \
+            -var="billing_account_id=${{ secrets.TF_VAR_BILLING_ACCOUNT_ID }}" \
+            -var="alert_email=${{ secrets.TF_VAR_ALERT_EMAIL }}"
 
   run-pipeline:
     runs-on: ubuntu-latest

@@ -1,6 +1,6 @@
 variable "project_id" {
-  type    = string
-  default = "pelagic-plexus-360917"
+  type        = string
+  description = "GCP project ID (set in terraform.tfvars, not committed)"
 }
 
 variable "region" {
@@ -14,13 +14,15 @@ variable "bq_location" {
 }
 
 variable "billing_account_id" {
-  type    = string
-  default = "REDACTED-BILLING-ACCOUNT-ID"
+  type        = string
+  description = "Billing account ID (set in terraform.tfvars, not committed)"
+  sensitive   = true
 }
 
 variable "alert_email" {
-  type    = string
-  default = "REDACTED-EMAIL@example.com"
+  type        = string
+  description = "Email for monitoring/budget alerts (set in terraform.tfvars, not committed)"
+  sensitive   = true
 }
 
 variable "budget_amount_usd" {

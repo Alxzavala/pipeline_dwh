@@ -6,6 +6,11 @@ terraform {
       version = "~> 5.0"
     }
   }
+
+  backend "gcs" {
+    bucket = "pelagic-plexus-360917-tfstate"
+    prefix = "dwh-pipeline"
+  }
 }
 
 provider "google" {

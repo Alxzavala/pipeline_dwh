@@ -1,6 +1,6 @@
 # Pipeline DWH Bancario — GCP
 
-Prueba técnica de Data Engineer: Data Warehouse en Google Cloud Platform que integra
+Data Warehouse en Google Cloud Platform que integra
 transacciones, datos de clientes y riesgo crediticio de una entidad bancaria en un
 modelo dimensional (esquema estrella) sobre BigQuery, con pipeline ETL/ELT, CI/CD e
 infraestructura como código.
@@ -51,7 +51,7 @@ gcloud billing projects link pelagic-plexus-360917 --billing-account=<ID_CUENTA_
 
 # 2. Aplicar infraestructura
 cd terraform
-cp terraform.tfvars.example terraform.tfvars   # editar github_repository con tu owner/repo
+cp terraform.tfvars.example terraform.tfvars   
 terraform init
 terraform apply
 
@@ -107,22 +107,3 @@ El pipeline emite un log estructurado (`jsonPayload.event=pipeline_failed`) a Cl
 Logging en cualquier fallo. Una métrica basada en logs y una política de alertas
 (ambas gestionadas por Terraform) notifican por correo ante cualquier fallo —
 verificado en vivo: log → métrica → alerta → correo recibido.
-
-## Costo y desmontaje
-
-Costo real de esta prueba: < $0.10 USD (dentro del *Always Free Tier* de GCS,
-BigQuery, Logging y Monitoring para este volumen de datos). Budget de seguridad de
-40 MXN (~$2 USD) configurado en la cuenta de facturación.
-
-Para desmontar todo al finalizar:
-
-```bash
-cd terraform
-terraform destroy
-
-# Eliminar el budget (no gestionado por Terraform, ver terraform/monitoring.tf)
-gcloud billing budgets delete billingAccounts/<ID_CUENTA>/budgets/<ID_BUDGET>
-
-# Desvincular facturación del proyecto
-gcloud billing projects unlink pelagic-plexus-360917
-```
